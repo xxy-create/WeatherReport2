@@ -1,12 +1,16 @@
 package com.xxy.weatherreport2;
 
 import android.Manifest;
+import android.animation.Animator;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -32,7 +36,7 @@ import com.xxy.weatherreport2.adapter.*;
 import com.xxy.mvplibrary.mvp.MvpActivity;
 import com.xxy.mvplibrary.view.WhiteWindmills;
 import com.xxy.mvplibrary.view.RoundProgressBar;
-import com.xxy.mvplibrary.utils.ObjectUtils;
+import com.xxy.mvplibrary.utils.*;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.IOException;
@@ -80,8 +84,10 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     TextView tvWindDirection;//风向
     @BindView(R.id.tv_wind_power)
     TextView tvWindPower;//风力
-    @BindView(R.id.iv_city_select)
-    ImageView ivcityselect; //城市图标ID
+//    @BindView(R.id.iv_city_select)
+//    ImageView ivcityselect; //城市图标ID
+    @BindView(R.id.iv_add)
+    ImageView ivAdd; //城市图标ID
     @BindView(R.id.refresh)
     SmartRefreshLayout refresh;//刷新布局
     @BindView(R.id.iv_location)
@@ -129,6 +135,16 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
 
     private String district;//改为全局的静态变量，方便更换城市之后也能进行下拉刷新
     private String city;//市 国控站点数据 用于请求空气质量
+
+    //右上角的弹窗
+    private PopupWindow mPopupWindow;
+    private AnimationUtil animUtil;
+    private float bgAlpha = 1f;
+    private boolean bright = false;
+    private static final long DURATION = 500;//0.5s
+    private static final float START_ALPHA = 0.7f;//开始透明度
+    private static final float END_ALPHA = 1f;//结束透明度
+
     //数据初始化  主线程，onCreate方法可以删除了，把里面的代码移动这个initData下面
     @Override
     public void initData(Bundle savedInstanceState) {
@@ -138,6 +154,11 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         initList();//天气预报列表初试化
         rxPermissions = new RxPermissions(this);//实例化这个权限请求框架，否则会报错
         permissionVersion();//权限判断
+        //由于这个刷新框架默认是有下拉和上拉，但是上拉没有用到，为了不造成误会，这里禁止使用上拉
+        refresh.setEnableLoadMore(false);
+        //初始弹窗
+        mPopupWindow = new PopupWindow(this);
+        animUtil = new AnimationUtil();
     }
 
     //绑定布局文件
@@ -547,10 +568,88 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
 
 
     //点击事件
-    @OnClick(R.id.iv_city_select)
-    public void onViewClicked() {//显示城市弹窗
-        showCityWindow();
+    @OnClick(R.id.iv_add)
+    public void onViewClicked(){
+        showAddWindow();//更多功能弹窗
+        toggleBright();//计算动画时间
     }
+
+    /**
+     * 更多功能弹窗，因为区别于我原先写的弹窗
+     */
+    private void showAddWindow() {
+        // 设置布局文件
+        mPopupWindow.setContentView(LayoutInflater.from(this).inflate(R.layout.window_add, null));// 为了避免部分机型不显示，我们需要重新设置一下宽高
+        mPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+        mPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        mPopupWindow.setBackgroundDrawable(new ColorDrawable(0x0000));// 设置pop透明效果
+        mPopupWindow.setAnimationStyle(R.style.pop_add);// 设置pop出入动画
+        mPopupWindow.setFocusable(true);// 设置pop获取焦点，如果为false点击返回按钮会退出当前Activity，如果pop中有Editor的话，focusable必须要为true
+        mPopupWindow.setTouchable(true);// 设置pop可点击，为false点击事件无效，默认为true
+        mPopupWindow.setOutsideTouchable(true);// 设置点击pop外侧消失，默认为false；在focusable为true时点击外侧始终消失
+        mPopupWindow.showAsDropDown(ivAdd, -100, 0);// 相对于 + 号正下面，同时可以设置偏移量
+        // 设置pop关闭监听，用于改变背景透明度
+        mPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {//关闭弹窗
+            @Override
+            public void onDismiss() {
+                toggleBright();
+            }
+        });
+        //绑定布局中的控件
+        TextView changeCity = mPopupWindow.getContentView().findViewById(R.id.tv_change_city);
+        //TextView changeBg = mPopupWindow.getContentView().findViewById(R.id.tv_change_bg);
+        TextView more = mPopupWindow.getContentView().findViewById(R.id.tv_more);
+        changeCity.setOnClickListener(view -> {//切换城市
+            showCityWindow();
+            mPopupWindow.dismiss();
+        });
+//        changeBg.setOnClickListener(view -> {//切换背景
+//            ToastUtils.showShortToast(context,"你点击了切换背景");
+//            mPopupWindow.dismiss();
+//        });
+        more.setOnClickListener(view -> {//更多功能
+            ToastUtils.showShortToast(context,"如果你有什么好的建议，可以博客留言哦！");
+            mPopupWindow.dismiss();
+        });
+    }
+
+    /**
+     * 计算动画时间
+     */
+    private void toggleBright() {
+        // 三个参数分别为：起始值 结束值 时长，那么整个动画回调过来的值就是从0.5f--1f的
+        animUtil.setValueAnimator(START_ALPHA, END_ALPHA, DURATION);
+        animUtil.addUpdateListener(new AnimationUtil.UpdateListener() {
+            @Override
+            public void progress(float progress) {
+                // 此处系统会根据上述三个值，计算每次回调的值是多少，我们根据这个值来改变透明度
+                bgAlpha = bright ? progress : (START_ALPHA + END_ALPHA - progress);
+                backgroundAlpha(bgAlpha);
+            }
+        });
+        animUtil.addEndListner(new AnimationUtil.EndListener() {
+            @Override
+            public void endUpdate(Animator animator) {
+                // 在一次动画结束的时候，翻转状态
+                bright = !bright;
+            }
+        });
+        animUtil.startAnimator();
+    }
+
+    /**
+     * 此方法用于改变背景的透明度，从而达到“变暗”的效果
+     */
+    private void backgroundAlpha(float bgAlpha) {
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        // 0.0-1.0
+        lp.alpha = bgAlpha;
+        getWindow().setAttributes(lp);
+        // everything behind this window will be dimmed.
+        // 此方法用来设置浮动层，防止部分手机变暗无效
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+    }
+
 
     //数据请求失败返回
     @Override

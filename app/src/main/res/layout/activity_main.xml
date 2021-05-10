@@ -39,11 +39,12 @@
                     android:textColor="#FFF"
                     android:text="毕业设计" />
                 <ImageView
-                    android:id="@+id/iv_city_select"
+                    android:id="@+id/iv_add"
                     android:layout_gravity="right"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:src="@mipmap/icon_city"
+                    android:src="@mipmap/icon_add"
+                    android:background="@drawable/selector_bg_img"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"/>
             </androidx.appcompat.widget.Toolbar>

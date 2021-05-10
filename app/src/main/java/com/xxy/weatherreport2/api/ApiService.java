@@ -43,5 +43,14 @@ public interface ApiService {
      */
     @GET("/s6/air/now?key=8688f2b89a1c47ffa5ed6bce0559a73d")
     Call<AirNowCityResponse> getAirNowCity(@Query("location") String location);
+
+    /**
+     * 获取所有天气数据，在返回值中再做处理
+     * @param location
+     * @return
+     */
+    @GET("/s6/weather?key=8688f2b89a1c47ffa5ed6bce0559a73d")
+    Call<WeatherResponse> weatherData(@Query("location") String location);
+
 }
 

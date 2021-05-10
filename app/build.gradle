@@ -39,8 +39,8 @@ android {
 dependencies {
 
     //butterknife  绑定视图依赖BindView，告别findById，不过你还得安装一个butterknife插件才行
-    implementation 'com.jakewharton:butterknife:10.1.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
+    implementation 'com.jakewharton:butterknife:10.2.3'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
     //Google Material控件,以及迁移到AndroidX下一些控件的依赖
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
@@ -65,8 +65,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation files('libs\\BaiduLBS_Android.jar')
+    implementation files('libs/BaiduLBS_Android.jar')
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation project(':mvplibrary')//引入模块  然后将项目里的依赖移动到模块的build.gradle里
 }

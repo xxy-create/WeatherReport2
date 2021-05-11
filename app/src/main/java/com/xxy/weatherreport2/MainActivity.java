@@ -2,7 +2,7 @@ package com.xxy.weatherreport2;
 
 import android.Manifest;
 import android.animation.Animator;
-import android.graphics.Typeface;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,12 +17,9 @@ import android.widget.PopupWindow;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
@@ -31,8 +28,10 @@ import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.xxy.mvplibrary.utils.LiWindow;
 import com.xxy.weatherreport2.bean.*;
 import com.xxy.weatherreport2.contract.WeatherContract;
+import com.xxy.weatherreport2.eventbus.SearchCityEvent;
 import com.xxy.weatherreport2.utils.*;
 import com.xxy.weatherreport2.adapter.*;
+import com.xxy.weatherreport2.ui.SearchCityActivity;
 import com.xxy.mvplibrary.mvp.MvpActivity;
 import com.xxy.mvplibrary.view.WhiteWindmills;
 import com.xxy.mvplibrary.view.RoundProgressBar;
@@ -46,20 +45,17 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import retrofit2.Response;
 
-import static com.xxy.mvplibrary.utils.RecyclerViewAnimation.runLayoutAnimationRight;
 import static com.xxy.mvplibrary.utils.RecyclerViewAnimation.runLayoutAnimationRight;
 
 public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> implements WeatherContract.IWeatherView {
@@ -108,6 +104,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     TextView tvO3;//臭氧
     @BindView(R.id.tv_co)
     TextView tvCo;//一氧化碳
+
 
     private boolean flag = true;//图标显示标识,true显示，false不显示,只有定位的时候才为true,切换城市和常用城市都为false
 
@@ -159,6 +156,16 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         //初始弹窗
         mPopupWindow = new PopupWindow(this);
         animUtil = new AnimationUtil();
+
+        EventBus.getDefault().register(this);//注册
+    }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(SearchCityEvent event){//授权
+        //获取所有weather数据
+        mPresent.weatherData(context,event.mLocation);
+        //获取空气质量数据
+        mPresent.airNowCity(context,event.mLocation);
+
     }
 
     //绑定布局文件
@@ -361,6 +368,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     public void onDestroy() {
         wwBig.stop();//停止大风车
         wwSmall.stop();//停止小风车
+        EventBus.getDefault().unregister(this);//注解
         super.onDestroy();
     }
 
@@ -588,6 +596,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         //绑定布局中的控件
         TextView changeCity = mPopupWindow.getContentView().findViewById(R.id.tv_change_city);
         //TextView changeBg = mPopupWindow.getContentView().findViewById(R.id.tv_change_bg);
+        TextView searchCity = mPopupWindow.getContentView().findViewById(R.id.tv_search_city);//城市搜索
         TextView more = mPopupWindow.getContentView().findViewById(R.id.tv_more);
         changeCity.setOnClickListener(view -> {//切换城市
             showCityWindow();
@@ -597,6 +606,11 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
 //            ToastUtils.showShortToast(context,"你点击了切换背景");
 //            mPopupWindow.dismiss();
 //        });
+        searchCity.setOnClickListener(view -> {//城市搜索
+            SPUtils.putBoolean(Constant.FLAG_OTHER_RETURN, false, context);//缓存标识
+            startActivity(new Intent(context, SearchCityActivity.class));
+            mPopupWindow.dismiss();
+        });
         more.setOnClickListener(view -> {//更多功能
             ToastUtils.showShortToast(context,"如果你有什么好的建议，可以博客留言哦！");
             mPopupWindow.dismiss();

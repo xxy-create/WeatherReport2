@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 搜索城市结果列表适配器
  */
-public class SearchCityAdapter extends BaseQuickAdapter<SearchCityResponse.HeWeather6Bean.BasicBean, BaseViewHolder> {
+public class  SearchCityAdapter extends BaseQuickAdapter<SearchCityResponse.HeWeather6Bean.BasicBean, BaseViewHolder> {
     public SearchCityAdapter(int layoutResId, @Nullable List<SearchCityResponse.HeWeather6Bean.BasicBean> data) {
         super(layoutResId, data);
     }

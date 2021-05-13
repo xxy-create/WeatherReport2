@@ -74,15 +74,6 @@
                     android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
-                    <!--天气状况-->
-                    <TextView
-                        android:paddingLeft="16dp"
-                        android:paddingTop="12dp"
-                        android:id="@+id/tv_info"
-                        android:textColor="#FFF"
-                        android:textSize="18sp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
                     <!--温度-->
                     <RelativeLayout
                         android:layout_marginTop="20dp"
@@ -107,13 +98,50 @@
                     </RelativeLayout>
 
                     <!--最高温和最低温-->
-                    <TextView
-                        android:layout_marginTop="12dp"
-                        android:id="@+id/tv_low_height"
-                        android:textColor="#FFF"
-                        android:textSize="@dimen/sp_14"
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/dp_12">
+
+                        <TextView
+                            android:id="@+id/tv_temp_height"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#FFF"
+                            android:textSize="@dimen/sp_14" />
+
+                        <TextView
+                            android:id="@+id/tv_temp_low"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/temp_min_tx"
+                            android:textSize="@dimen/sp_14" />
+                    </LinearLayout>
+
+                    <!--天气状况和空气质量-->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/dp_8"
+                        android:orientation="horizontal">
+                        <!--天气状况-->
+                        <TextView
+                            android:id="@+id/tv_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/sp_14" />
+
+                        <!--空气质量-->
+                        <TextView
+                            android:id="@+id/tv_air_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingLeft="@dimen/dp_8"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/sp_14" />
+
+                    </LinearLayout>
                     <!--城市-->
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -147,7 +175,7 @@
                         <TextView
                             android:drawableLeft="@mipmap/icon_weather_sun"
                             android:drawablePadding="4dp"
-                            android:text="Good Weather"
+                            android:text="XXY加油！"
                             android:textSize="@dimen/sp_12"
                             android:textColor="#FFF"
                             android:layout_width="wrap_content"
@@ -190,217 +218,254 @@
 
                     <!--空气质量-->
                     <LinearLayout
-                        android:padding="20dp"
-                        android:orientation="vertical"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-                        <!--标题-->
-                        <TextView
-                            android:textSize="18sp"
-                            android:textColor="@color/white"
-                            android:text="空气质量"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
 
                         <LinearLayout
-                            android:padding="8dp"
-                            android:orientation="horizontal"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical">
+                            <!--标题-->
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="空气质量"
+                                android:textColor="@color/white"
+                                android:textSize="18sp" />
+
+                            <!--更多空气质量信息-->
+                            <TextView
+                                android:id="@+id/tv_more_air"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableRight="@mipmap/icon_more_blue"
+                                android:padding="@dimen/dp_4"
+                                android:text="更多"
+                                android:textColor="@color/blue_more"
+                                android:textSize="@dimen/sp_14" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="8dp">
                             <!--污染指数 动画展示-->
                             <LinearLayout
-                                android:gravity="center"
-                                android:orientation="vertical"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
-                                android:layout_weight="1">
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
                                 <TextView
-                                    android:layout_marginBottom="8dp"
-                                    android:textSize="14sp"
-                                    android:textColor="#DAEBEE"
-                                    android:text="污染指数"
                                     android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"/>
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="8dp"
+                                    android:text="污染指数"
+                                    android:textColor="#DAEBEE"
+                                    android:textSize="14sp" />
                                 <!--显示污染指数进度值-->
                                 <com.xxy.mvplibrary.view.RoundProgressBar
                                     android:id="@+id/rpb_aqi"
-                                    app:round_bg_color="#C6D7F4"
-                                    app:round_progress_color="#FBFEF7"
-                                    android:layout_gravity="center"
                                     android:layout_width="120dp"
-                                    android:layout_height="120dp"/>
+                                    android:layout_height="120dp"
+                                    android:layout_gravity="center"
+                                    app:round_bg_color="#C6D7F4"
+                                    app:round_progress_color="#FBFEF7" />
                             </LinearLayout>
                             <!--其他指数-->
                             <LinearLayout
-                                android:orientation="vertical"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1">
+                                android:layout_weight="1"
+                                android:orientation="vertical">
                                 <!--PM10-->
                                 <LinearLayout
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content">
+
                                     <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
                                         android:gravity="center"
-                                        android:textColor="@color/blue_one"
                                         android:text="PM10"
-                                        android:textSize="12sp"
-                                        android:layout_width="0dp"
-                                        android:layout_weight="1"
-                                        android:layout_height="wrap_content"/>
+                                        android:textColor="@color/blue_one"
+                                        android:textSize="12sp" />
+
                                     <TextView
-                                        android:gravity="center"
                                         android:id="@+id/tv_pm10"
-                                        android:textColor="@color/white"
-                                        android:textSize="12sp"
                                         android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
                                         android:layout_weight="1"
-                                        android:layout_height="wrap_content"/>
+                                        android:gravity="center"
+                                        android:textColor="@color/white"
+                                        android:textSize="12sp" />
                                 </LinearLayout>
 
                                 <!--PM2.5-->
                                 <LinearLayout
-                                    android:layout_marginTop="12dp"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content">
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="12dp">
+
                                     <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
                                         android:gravity="center"
-                                        android:textColor="@color/blue_one"
                                         android:text="PM2.5"
-                                        android:textSize="12sp"
-                                        android:layout_width="0dp"
-                                        android:layout_weight="1"
-                                        android:layout_height="wrap_content"/>
+                                        android:textColor="@color/blue_one"
+                                        android:textSize="12sp" />
+
                                     <TextView
-                                        android:gravity="center"
                                         android:id="@+id/tv_pm25"
-                                        android:textColor="@color/white"
-                                        android:textSize="12sp"
                                         android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
                                         android:layout_weight="1"
-                                        android:layout_height="wrap_content"/>
+                                        android:gravity="center"
+                                        android:textColor="@color/white"
+                                        android:textSize="12sp" />
                                 </LinearLayout>
 
                                 <!--NO2 二氧化氮-->
                                 <LinearLayout
-                                    android:layout_marginTop="12dp"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content">
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="12dp">
+
                                     <LinearLayout
-                                        android:gravity="center"
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
-                                        android:layout_weight="1">
-                                        <TextView
-                                            android:textColor="@color/blue_one"
-                                            android:text="NO"
-                                            android:textSize="12sp"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"/>
-                                        <TextView
-                                            android:textColor="@color/blue_one"
-                                            android:text="2"
-                                            android:textSize="8sp"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"/>
-                                    </LinearLayout>
-                                    <TextView
-                                        android:gravity="center"
-                                        android:id="@+id/tv_no2"
-                                        android:textColor="@color/white"
-                                        android:textSize="12sp"
-                                        android:layout_width="0dp"
                                         android:layout_weight="1"
-                                        android:layout_height="wrap_content"/>
+                                        android:gravity="center">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="NO"
+                                            android:textColor="@color/blue_one"
+                                            android:textSize="12sp" />
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="2"
+                                            android:textColor="@color/blue_one"
+                                            android:textSize="8sp" />
+                                    </LinearLayout>
+
+                                    <TextView
+                                        android:id="@+id/tv_no2"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="center"
+                                        android:textColor="@color/white"
+                                        android:textSize="12sp" />
                                 </LinearLayout>
 
                                 <!--SO2 二氧化硫-->
                                 <LinearLayout
-                                    android:layout_marginTop="12dp"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content">
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="12dp">
+
                                     <LinearLayout
-                                        android:gravity="center"
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
-                                        android:layout_weight="1">
-                                        <TextView
-                                            android:textColor="@color/blue_one"
-                                            android:text="SO"
-                                            android:textSize="12sp"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"/>
-                                        <TextView
-                                            android:textColor="@color/blue_one"
-                                            android:text="2"
-                                            android:textSize="8sp"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"/>
-                                    </LinearLayout>
-                                    <TextView
-                                        android:gravity="center"
-                                        android:id="@+id/tv_so2"
-                                        android:textColor="@color/white"
-                                        android:textSize="12sp"
-                                        android:layout_width="0dp"
                                         android:layout_weight="1"
-                                        android:layout_height="wrap_content"/>
+                                        android:gravity="center">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="SO"
+                                            android:textColor="@color/blue_one"
+                                            android:textSize="12sp" />
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="2"
+                                            android:textColor="@color/blue_one"
+                                            android:textSize="8sp" />
+                                    </LinearLayout>
+
+                                    <TextView
+                                        android:id="@+id/tv_so2"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="center"
+                                        android:textColor="@color/white"
+                                        android:textSize="12sp" />
                                 </LinearLayout>
 
                                 <!--O3 臭氧-->
                                 <LinearLayout
-                                    android:layout_marginTop="12dp"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content">
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="12dp">
+
                                     <LinearLayout
-                                        android:gravity="center"
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
-                                        android:layout_weight="1">
-                                        <TextView
-                                            android:textColor="@color/blue_one"
-                                            android:text="O"
-                                            android:textSize="12sp"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"/>
-                                        <TextView
-                                            android:textColor="@color/blue_one"
-                                            android:text="3"
-                                            android:textSize="8sp"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"/>
-                                    </LinearLayout>
-                                    <TextView
-                                        android:gravity="center"
-                                        android:id="@+id/tv_o3"
-                                        android:textColor="@color/white"
-                                        android:textSize="12sp"
-                                        android:layout_width="0dp"
                                         android:layout_weight="1"
-                                        android:layout_height="wrap_content"/>
+                                        android:gravity="center">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="O"
+                                            android:textColor="@color/blue_one"
+                                            android:textSize="12sp" />
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="3"
+                                            android:textColor="@color/blue_one"
+                                            android:textSize="8sp" />
+                                    </LinearLayout>
+
+                                    <TextView
+                                        android:id="@+id/tv_o3"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="center"
+                                        android:textColor="@color/white"
+                                        android:textSize="12sp" />
                                 </LinearLayout>
 
                                 <!--CO 一氧化碳-->
                                 <LinearLayout
-                                    android:layout_marginTop="12dp"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content">
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="12dp">
+
                                     <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
                                         android:gravity="center"
-                                        android:textColor="@color/blue_one"
                                         android:text="CO"
-                                        android:textSize="12sp"
-                                        android:layout_width="0dp"
-                                        android:layout_weight="1"
-                                        android:layout_height="wrap_content"/>
+                                        android:textColor="@color/blue_one"
+                                        android:textSize="12sp" />
+
                                     <TextView
-                                        android:gravity="center"
                                         android:id="@+id/tv_co"
-                                        android:textColor="@color/white"
-                                        android:textSize="12sp"
                                         android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
                                         android:layout_weight="1"
-                                        android:layout_height="wrap_content"/>
+                                        android:gravity="center"
+                                        android:textColor="@color/white"
+                                        android:textSize="12sp" />
                                 </LinearLayout>
                             </LinearLayout>
                         </LinearLayout>

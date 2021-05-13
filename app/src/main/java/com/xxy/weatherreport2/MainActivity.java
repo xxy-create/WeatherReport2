@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ import com.xxy.mvplibrary.utils.LiWindow;
 import com.xxy.weatherreport2.bean.*;
 import com.xxy.weatherreport2.contract.WeatherContract;
 import com.xxy.weatherreport2.eventbus.SearchCityEvent;
+import com.xxy.weatherreport2.ui.MoreAirActivity;
 import com.xxy.weatherreport2.utils.*;
 import com.xxy.weatherreport2.adapter.*;
 import com.xxy.weatherreport2.ui.SearchCityActivity;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -57,15 +60,20 @@ import butterknife.OnClick;
 import retrofit2.Response;
 
 import static com.xxy.mvplibrary.utils.RecyclerViewAnimation.runLayoutAnimationRight;
+import static com.xxy.mvplibrary.utils.RecyclerViewAnimation.runLayoutAnimation;
 
 public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> implements WeatherContract.IWeatherView {
 
+    @BindView(R.id.tv_air_info)
+    TextView tvAirInfo;//空气质量
     @BindView(R.id.tv_info)
     TextView tvInfo;//天气状况
     @BindView(R.id.tv_temperature)
     TextView tvTemperature;//温度
-    @BindView(R.id.tv_low_height)
-    TextView tvLowHeight;//最高温和最低温
+    @BindView(R.id.tv_temp_height)
+    TextView tvTempHeight;//最高温
+    @BindView(R.id.tv_temp_low)
+    TextView tvTempLow;//最低温
     @BindView(R.id.tv_city)
     TextView tvCity;//城市
     @BindView(R.id.tv_old_time)
@@ -104,7 +112,8 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     TextView tvO3;//臭氧
     @BindView(R.id.tv_co)
     TextView tvCo;//一氧化碳
-
+    @BindView(R.id.tv_more_air)
+    TextView tvMoreAir;//更多空气信息
 
     private boolean flag = true;//图标显示标识,true显示，false不显示,只有定位的时候才为true,切换城市和常用城市都为false
 
@@ -132,6 +141,11 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
 
     private String district;//改为全局的静态变量，方便更换城市之后也能进行下拉刷新
     private String city;//市 国控站点数据 用于请求空气质量
+    private String stationName = null;
+    private String locationId = null;//城市id，用于查询城市数据  V7版本 中 才有
+
+    private String lon = null;//经度
+    private String lat = null;//纬度
 
     //右上角的弹窗
     private PopupWindow mPopupWindow;
@@ -290,15 +304,18 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
                  * 查询7天天气预报
                  */
                 //最低温和最高温
-                tvLowHeight.setText(response.body().getHeWeather6().get(0).getDaily_forecast().get(0).getTmp_min() + " / " +
-                        response.body().getHeWeather6().get(0).getDaily_forecast().get(0).getTmp_max() + "℃");
-
+//                tvLowHeight.setText(response.body().getHeWeather6().get(0).getDaily_forecast().get(0).getTmp_min() + " / " +
+//                        response.body().getHeWeather6().get(0).getDaily_forecast().get(0).getTmp_max() + "℃");
+                tvTempHeight.setText(response.body().getHeWeather6().get(0).getDaily_forecast().get(0).getTmp_max() + "℃");
+                tvTempLow.setText("/"+response.body().getHeWeather6().get(0).getDaily_forecast().get(0).getTmp_min() + "℃");
                 if (response.body().getHeWeather6().get(0).getDaily_forecast() != null) {
                     List<WeatherResponse.HeWeather6Bean.DailyForecastBean> data
                             = response.body().getHeWeather6().get(0).getDaily_forecast();
                     mListDailyForecast.clear();//添加数据之前先清除
                     mListDailyForecast.addAll(data);//添加数据
                     mAdapter.notifyDataSetChanged();//刷新列表
+
+                    runLayoutAnimation(rv);
                 } else {
                     ToastUtils.showShortToast(context, "天气预报数据为空");
                 }
@@ -311,6 +328,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
                     mListHourlyBean.clear();//添加数据之前先清除
                     mListHourlyBean.addAll(data);//添加数据
                     mAdapterHourly.notifyDataSetChanged();//刷新列表
+                    runLayoutAnimationRight(rvHourly);
                 } else {
                     ToastUtils.showShortToast(context, "逐小时预报数据为空");
                 }
@@ -349,6 +367,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
                 rpbAqi.setMinText("0");
                 rpbAqi.setMinTextColor(getResources().getColor(R.color.arc_progress_color));
 
+                tvAirInfo.setText(data.getQlty());
                 tvPm10.setText(data.getPm10());//PM10
                 tvPm25.setText(data.getPm25());//PM2.5
                 tvNo2.setText(data.getNo2());//二氧化氮
@@ -358,6 +377,36 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
             }
         } else {
             ToastUtils.showShortToast(context, response.body().getHeWeather6().get(0).getStatus());
+        }
+    }
+
+    /**
+     * 和风天气  V7  API
+     * 通过定位到的地址 /  城市切换得到的地址  都需要查询出对应的城市id才行，所以在V7版本中，这是第一步接口
+     *
+     * @param response
+     */
+    @Override
+    public void getNewSearchCityResult(Response<NewSearchCityResponse> response) {
+        refresh.finishRefresh();//关闭刷新
+        if (mLocationClient != null) {
+            mLocationClient.stop();//数据返回后关闭定位
+        }
+        if (response.body().getCode().equals(Constant.SUCCESS_CODE)) {
+            if (response.body().getLocation() != null && response.body().getLocation().size() > 0) {
+                NewSearchCityResponse.LocationBean locationBean = response.body().getLocation().get(0);
+
+                tvCity.setText(locationBean.getName());//城市
+                locationId = locationBean.getId();//城市Id
+                stationName = locationBean.getAdm2();//上级城市 也是空气质量站点
+
+
+            } else {
+                ToastUtils.showShortToast(context, "数据为空");
+            }
+        } else {
+            tvCity.setText("查询城市失败");
+            ToastUtils.showShortToast(context, CodeToStringUtils.WeatherCode(response.body().getCode()));
         }
     }
 
@@ -565,12 +614,14 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     }
 
 
+/*
     //点击事件
     @OnClick(R.id.iv_add)
     public void onViewClicked(){
         showAddWindow();//更多功能弹窗
         toggleBright();//计算动画时间
     }
+*/
 
     /**
      * 更多功能弹窗，因为区别于我原先写的弹窗
@@ -652,6 +703,43 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         // everything behind this window will be dimmed.
         // 此方法用来设置浮动层，防止部分手机变暗无效
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+    }
+
+    /**
+     * 添加点击事件
+     *
+     * @param view 控件
+     */
+    @OnClick({ R.id.iv_add, R.id.tv_more_air,})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.iv_add://更多功能弹窗
+                showAddWindow();//更多功能弹窗
+                toggleBright();//计算动画时间
+                break;
+            case R.id.tv_more_air://更多空气质量信息
+                goToMore(MoreAirActivity.class);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 进入更多数据页面
+     *
+     * @param clazz 要进入的页面
+     */
+    private void goToMore(Class<?> clazz) {
+        if (locationId == null) {
+            ToastUtils.showShortToast(context, "很抱歉，未获取到相关更多信息");
+        } else {
+            Intent intent = new Intent(context, clazz);
+            intent.putExtra("locationId", locationId);
+            intent.putExtra("stationName", stationName);//只要locationId不为空，则cityName不会为空,只判断一次即可
+            intent.putExtra("cityName", tvCity.getText().toString());
+            startActivity(intent);
+        }
     }
 
     /**

@@ -27,6 +27,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.xxy.weatherreport2.R;
 import com.xxy.weatherreport2.adapter.SearchCityAdapter;
+import com.xxy.weatherreport2.adapter.NewSearchCityAdapter;
+import com.xxy.weatherreport2.bean.NewSearchCityResponse;
 import com.xxy.weatherreport2.bean.SearchCityResponse;
 import com.xxy.weatherreport2.contract.SearchCityContract;
 import com.xxy.weatherreport2.utils.*;
@@ -77,6 +79,7 @@ public class SearchCityActivity extends MvpActivity<SearchCityContract.SearchCit
 
     List<SearchCityResponse.HeWeather6Bean.BasicBean> mList = new ArrayList<>();//数据源
     SearchCityAdapter mAdapter;//适配器
+
 
     private RecordsDao mRecordsDao;
     //默然展示词条个数

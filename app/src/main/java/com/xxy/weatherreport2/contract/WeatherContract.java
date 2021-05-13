@@ -19,6 +19,29 @@ public class WeatherContract {
     public static class WeatherPresenter extends BasePresenter<IWeatherView> {
 
         /**
+         * 搜索城市  V7版本中  需要把定位城市的id查询出来，然后通过这个id来查询详细的数据
+         * @param location 城市名
+         */
+        public void newSearchCity(String location) {//注意这里的4表示新的搜索城市地址接口
+            ApiService service = ServiceGenerator.createService(ApiService.class, 4);//指明访问的地址
+            service.newSearchCity(location,"exact").enqueue(new NetCallBack<NewSearchCityResponse>() {
+                @Override
+                public void onSuccess(Call<NewSearchCityResponse> call, Response<NewSearchCityResponse> response) {
+                    if(getView() != null){
+                        getView().getNewSearchCityResult(response);
+                    }
+                }
+
+                @Override
+                public void onFailed() {
+                    if(getView() != null){
+                        getView().getDataFailed();
+                    }
+                }
+            });
+        }
+
+        /**
          * 空气质量数据
          *
          * @param context
@@ -70,6 +93,8 @@ public class WeatherContract {
     }
 
     public interface IWeatherView extends BaseView {
+        //搜索城市返回城市id  通过id才能查下面的数据,否则会提示400  V7
+        void getNewSearchCityResult(Response<NewSearchCityResponse> response);
         //查询空气质量的数据返回
         void getAirNowCityResult(Response<AirNowCityResponse> response);
 

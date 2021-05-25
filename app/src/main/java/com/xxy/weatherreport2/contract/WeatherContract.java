@@ -23,7 +23,7 @@ public class WeatherContract {
          * @param location 城市名
          */
         public void newSearchCity(String location) {//注意这里的4表示新的搜索城市地址接口
-            ApiService service = ServiceGenerator.createService(ApiService.class, 4);//指明访问的地址
+            ApiService service = ServiceGenerator.createService(ApiService.class, 3);//指明访问的地址
             service.newSearchCity(location,"exact").enqueue(new NetCallBack<NewSearchCityResponse>() {
                 @Override
                 public void onSuccess(Call<NewSearchCityResponse> call, Response<NewSearchCityResponse> response) {
@@ -47,7 +47,7 @@ public class WeatherContract {
          * @param context
          * @param location
          */
-        public void airNowCity(final Context context, String location) {
+        /*public void airNowCity(final Context context, String location) {
             ApiService service = ServiceGenerator.createService(ApiService.class, 0);
             service.getAirNowCity(location).enqueue(new NetCallBack<AirNowCityResponse>() {
                 @Override
@@ -61,6 +61,29 @@ public class WeatherContract {
                 public void onFailed() {
                     if (getView() != null) {
                         getView().getDataFailed();
+                    }
+                }
+            });
+        }*/
+
+        /**
+         * 当天空气质量
+         * @param location   城市名
+         */
+        public void airNowWeather(String location){
+            ApiService service = ServiceGenerator.createService(ApiService.class,2);
+            service.airNowWeather(location).enqueue(new NetCallBack<AirNowResponse>() {
+                @Override
+                public void onSuccess(Call<AirNowResponse> call, Response<AirNowResponse> response) {
+                    if(getView() != null){
+                        getView().getAirNowResult(response);
+                    }
+                }
+
+                @Override
+                public void onFailed() {
+                    if(getView() != null){
+                        getView().getWeatherDataFailed();
                     }
                 }
             });
@@ -96,8 +119,10 @@ public class WeatherContract {
         //搜索城市返回城市id  通过id才能查下面的数据,否则会提示400  V7
         void getNewSearchCityResult(Response<NewSearchCityResponse> response);
         //查询空气质量的数据返回
-        void getAirNowCityResult(Response<AirNowCityResponse> response);
+        //void getAirNowCityResult(Response<AirNowCityResponse> response);
 
+        //空气质量
+        void getAirNowResult(Response<AirNowResponse> response);
         //查询天气所有数据
         void getWeatherDataResult(Response<WeatherResponse> response);
         //天气数据获取错误返回

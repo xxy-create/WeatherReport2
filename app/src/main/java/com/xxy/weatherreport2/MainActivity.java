@@ -178,8 +178,10 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         //获取所有weather数据
         mPresent.weatherData(context,event.mLocation);
         //获取空气质量数据
-        mPresent.airNowCity(context,event.mLocation);
-
+        //mPresent.airNowCity(context,event.mLocation);
+        flag=false;
+        //v7版本中需要先获取城市ID，在结果返回值中在进行下一步的数据查询
+        mPresent.newSearchCity(event.mLocation);
     }
 
     //绑定布局文件
@@ -255,14 +257,17 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
             //获取weather所有数据
             mPresent.weatherData(context,district);
             //获取空气质量数据
-            mPresent.airNowCity(context,city);
-
+            //mPresent.airNowCity(context,city);
+            //v7版本中需要先获取城市ID，在结果返回值中在进行下一步的数据查询
+            mPresent.newSearchCity(district);
             //下拉刷新
             refresh.setOnRefreshListener(refreshLayout -> {
                 //获取weather所有数据
                 mPresent.weatherData(context,district);
                 //获取空气质量数据
-                mPresent.airNowCity(context,city);
+                //mPresent.airNowCity(context,city);
+                //v7版本中需要先获取城市ID，在结果返回值中在进行下一步的数据查询
+                mPresent.newSearchCity(district);
             });
         }
     }
@@ -344,7 +349,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
 
 
         //空气质量数据返回
-    @Override
+/*    @Override
     public void getAirNowCityResult(Response<AirNowCityResponse> response) {
         dismissLoadingDialog();//关闭弹窗
         if (("ok").equals(response.body().getHeWeather6().get(0).getStatus())) {
@@ -378,7 +383,46 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         } else {
             ToastUtils.showShortToast(context, response.body().getHeWeather6().get(0).getStatus());
         }
+    }*/
+
+    /**
+     * 空气质量返回  V7
+     * @param response
+     */
+    @Override
+    public void getAirNowResult(Response<AirNowResponse> response) {
+        if(response.body().getCode().equals(Constant.SUCCESS_CODE)){
+            AirNowResponse.NowBean data = response.body().getNow();
+            if(response.body().getNow() !=null){
+                rpbAqi.setMaxProgress(300);//最大进度，用于计算
+                rpbAqi.setMinText("0");//设置显示最小值
+                rpbAqi.setMinTextSize(32f);
+                rpbAqi.setMaxText("300");//设置显示最大值
+                rpbAqi.setMaxTextSize(32f);
+                rpbAqi.setProgress(Float.valueOf(data.getAqi()));//当前进度
+                rpbAqi.setArcBgColor(getResources().getColor(R.color.arc_bg_color));//圆弧的颜色
+                rpbAqi.setProgressColor(getResources().getColor(R.color.arc_progress_color));//进度圆弧的颜色
+                rpbAqi.setFirstText(data.getCategory());//空气质量描述 取值范围：优，良，轻度污染，中度污染，重度污染，严重污染
+                rpbAqi.setFirstTextSize(44f);//第一行文本的字体大小
+                rpbAqi.setSecondText(data.getAqi());//空气质量值
+                rpbAqi.setSecondTextSize(64f);//第二行文本的字体大小
+                rpbAqi.setMinText("0");
+                rpbAqi.setMinTextColor(getResources().getColor(R.color.arc_progress_color));
+
+                tvPm10.setText(data.getPm10());//PM10
+                tvPm25.setText(data.getPm2p5());//PM2.5
+                tvNo2.setText(data.getNo2());//二氧化氮
+                tvSo2.setText(data.getSo2());//二氧化硫
+                tvO3.setText(data.getO3());//臭氧
+                tvCo.setText(data.getCo());//一氧化碳
+            }else {
+                ToastUtils.showShortToast(context,"空气质量数据为空");
+            }
+        }else {
+            ToastUtils.showShortToast(context, CodeToStringUtils.WeatherCode(response.body().getCode()));
+        }
     }
+
 
     /**
      * 和风天气  V7  API
@@ -394,13 +438,11 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         }
         if (response.body().getCode().equals(Constant.SUCCESS_CODE)) {
             if (response.body().getLocation() != null && response.body().getLocation().size() > 0) {
-                NewSearchCityResponse.LocationBean locationBean = response.body().getLocation().get(0);
+                tvCity.setText(response.body().getLocation().get(0).getName());//城市
+                locationId = response.body().getLocation().get(0).getId();//城市Id
 
-                tvCity.setText(locationBean.getName());//城市
-                locationId = locationBean.getId();//城市Id
-                stationName = locationBean.getAdm2();//上级城市 也是空气质量站点
-
-
+                showLoadingDialog();
+                mPresent.airNowWeather(locationId);//空气质量
             } else {
                 ToastUtils.showShortToast(context, "数据为空");
             }
@@ -589,7 +631,9 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
                                             showLoadingDialog();
                                             district = arealist.get(position).getName();//选中的区县赋值给这个全局变量
                                             mPresent.weatherData(context,district);//获取weather所有数据
-                                            mPresent.airNowCity(context,city);//空气质量数据
+                                            //mPresent.airNowCity(context,city);//空气质量数据
+                                            //v7版本中需要先获取城市ID，在结果返回值中在进行下一步的数据查询
+                                            mPresent.newSearchCity(district);
                                             flag=false;//切换的城市不属于定位，隐藏定位图标
                                             liWindow.closePopupWindow();
 

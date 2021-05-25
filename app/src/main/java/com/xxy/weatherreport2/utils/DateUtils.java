@@ -121,6 +121,17 @@ import java.util.Locale;
         }
         return result;
     }
+    //根据传入的时间，先转换再截取，得到更新时间  传入  "2020-07-16T09:39+08:00"
+    /*@RequiresApi(api = Build.VERSION_CODES.O)
+    public static String updateTime(String dateTime) {
+        String result = null;
+
+        LocalDateTime date = LocalDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        System.out.println("dateString:"+dateString);//到这一步，时间格式已经转换好了
+        result = dateString.substring(11);//进一步截取以达到我项目中的需求
+        return result;
+    }*/
 
     /**
      * 获取今天是星期几

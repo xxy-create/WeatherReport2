@@ -13,24 +13,13 @@ import retrofit2.http.Query;
 public interface ApiService {
 
     /**
-     * 空气质量数据 这个location要传入市的参数，不再是区县，否则会提示permission denied
-     */
-    @GET("/s6/air/now?key=8688f2b89a1c47ffa5ed6bce0559a73d")
-    Call<AirNowCityResponse> getAirNowCity(@Query("location") String location);
-
-    /**
      * 获取所有天气数据，在返回值中再做处理
      * @param location
      * @return
      */
-    @GET("/s6/weather?key=8688f2b89a1c47ffa5ed6bce0559a73d")
+    @GET("/s6/weather?key=7ae6424660264f0eb94c720bcc14588b")
     Call<WeatherResponse> weatherData(@Query("location") String location);
 
-    /**
-     * 搜索城市
-     */
-    @GET("/find?key=3086e91d66c04ce588a7f538f917c7f4&group=cn&number=10")
-    Call<SearchCityResponse> searchCity(@Query("location") String location);
 
     /**
      * 空气质量5天预报
@@ -58,7 +47,7 @@ public interface ApiService {
      * @param location 城市id
      * @return 返回当天空气质量数据 MoreAirFiveResponse
      */
-    @GET("/v7/air/now?key=3086e91d66c04ce588a7f538f917c7f4")
+    @GET("/v7/air/now?key=7ae6424660264f0eb94c720bcc14588b")
     Call<AirNowResponse> airNowWeather(@Query("location") String location);
 
     /**

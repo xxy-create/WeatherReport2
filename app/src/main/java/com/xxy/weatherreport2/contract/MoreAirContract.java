@@ -24,7 +24,7 @@ public class MoreAirContract {
          * @param location 城市名
          */
         public void searchCityId(String location) {//注意这里的4表示新的搜索城市地址接口
-            ApiService service = ServiceGenerator.createService(ApiService.class, 4);//指明访问的地址
+            ApiService service = ServiceGenerator.createService(ApiService.class, 3);//指明访问的地址
             service.newSearchCity(location,"exact").enqueue(new NetCallBack<NewSearchCityResponse>() {
                 @Override
                 public void onSuccess(Call<NewSearchCityResponse> call, Response<NewSearchCityResponse> response) {
@@ -48,7 +48,7 @@ public class MoreAirContract {
          * @param location  城市id
          */
         public void air(String location) {
-            ApiService service = ServiceGenerator.createService(ApiService.class,3);
+            ApiService service = ServiceGenerator.createService(ApiService.class,2);
             service.airNowWeather(location).enqueue(new NetCallBack<AirNowResponse>() {
                 @Override
                 public void onSuccess(Call<AirNowResponse> call, Response<AirNowResponse> response) {
@@ -71,7 +71,7 @@ public class MoreAirContract {
          * @param location  城市id
          */
         public void airFive(String location) {
-            ApiService service = ServiceGenerator.createService(ApiService.class,3);
+            ApiService service = ServiceGenerator.createService(ApiService.class,2);
             service.airFiveWeather(location).enqueue(new NetCallBack<MoreAirFiveResponse>() {
                 @Override
                 public void onSuccess(Call<MoreAirFiveResponse> call, Response<MoreAirFiveResponse> response) {

@@ -1,7 +1,6 @@
 package com.xxy.weatherreport2.ui;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -27,9 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.xxy.weatherreport2.R;
 import com.xxy.weatherreport2.adapter.SearchCityAdapter;
-import com.xxy.weatherreport2.adapter.NewSearchCityAdapter;
 import com.xxy.weatherreport2.bean.NewSearchCityResponse;
-import com.xxy.weatherreport2.bean.SearchCityResponse;
 import com.xxy.weatherreport2.contract.SearchCityContract;
 import com.xxy.weatherreport2.utils.*;
 import com.xxy.weatherreport2.eventbus.SearchCityEvent;
@@ -43,7 +40,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -191,20 +187,14 @@ public class SearchCityActivity extends MvpActivity<SearchCityContract.SearchCit
         mAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
             @Override
             public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                /*SPUtils.putString(Constant.LOCATION, mList.get(position).getLocation(), context);
-                //发送消息
-                EventBus.getDefault().post(new SearchCityEvent(mList.get(position).getLocation(),
-                        mList.get(position).getParent_city()));
-*/
                 SPUtils.putString(Constant.LOCATION, mList.get(position).getName(), context);
                 //发送消息
                 EventBus.getDefault().post(new SearchCityEvent(mList.get(position).getName(),
-                        mList.get(position).getAdm2()));
+                        mList.get(position).getAdm2()));//Adm2 代表市
 
                 finish();
             }
         });
-
     }
 
     //历史记录布局
@@ -311,27 +301,6 @@ public class SearchCityActivity extends MvpActivity<SearchCityContract.SearchCit
         return new SearchCityContract.SearchCityPresenter();
     }
 
-    /**
-     * 搜索城市返回的结果数据
-     * @param response
-     */
-    /*@Override
-    public void getSearchCityResult(Response<SearchCityResponse> response) {
-        dismissLoadingDialog();
-        if (("ok").equals(response.body().getHeWeather6().get(0).getStatus())) {
-            if (response.body().getHeWeather6().get(0).getBasic().size() > 0) {
-                mList.clear();
-                mList.addAll(response.body().getHeWeather6().get(0).getBasic());
-                mAdapter.notifyDataSetChanged();
-                runLayoutAnimation(rv);
-            } else {
-                ToastUtils.showShortToast(context, "很抱歉，未找到相应的城市");
-            }
-
-        } else {
-            ToastUtils.showShortToast(context, CodeToStringUtils.WeatherCode(response.body().getHeWeather6().get(0).getStatus()));
-        }
-    }*/
 
     /**
      * 搜索城市返回数据  V7
@@ -347,7 +316,7 @@ public class SearchCityActivity extends MvpActivity<SearchCityContract.SearchCit
             mAdapter.notifyDataSetChanged();
             runLayoutAnimation(rv);
         } else {
-            ToastUtils.showShortToast(context, CodeToStringUtils.WeatherCode(response.body().getStatus()));
+            ToastUtils.showShortToast(context, CodeToStringUtils.WeatherCode(response.body().getCode()));
         }
     }
 
@@ -360,55 +329,6 @@ public class SearchCityActivity extends MvpActivity<SearchCityContract.SearchCit
         ToastUtils.showShortToast(context, "网络异常");//这里的context是框架中封装好的，等同于this
     }
 
-    //初始化列表
-    private void initResultList() {
-        mAdapter = new SearchCityAdapter(R.layout.item_search_city_list, mList);
-        rv.setLayoutManager(new LinearLayoutManager(context));
-        rv.setAdapter(mAdapter);
-
-        mAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-            @Override
-            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-/*
-                SPUtils.putString(Constant.LOCATION, mList.get(position).getLocation(), context);
-                //发送消息
-                EventBus.getDefault().post(new SearchCityEvent(mList.get(position).getLocation(),
-                        mList.get(position).getParent_city()));
-*/
-                SPUtils.putString(Constant.LOCATION, mList.get(position).getName(), context);
-                //发送消息
-                EventBus.getDefault().post(new SearchCityEvent(mList.get(position).getName(),
-                        mList.get(position).getAdm2()));
-
-                finish();
-            }
-        });
-    }
-
-    //初始化输入框
-    private void initEdit() {
-        editQuery.addTextChangedListener(textWatcher);//添加输入监听
-        //监听软件键盘搜索按钮
-        editQuery.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    String location = editQuery.getText().toString();
-                    if (!TextUtils.isEmpty(location)) {
-                        showLoadingDialog();
-                        //mPresent.searchCity(context, location);
-                        mPresent.newSearchCity(location);//搜索城市  V7
-
-                        //数据保存
-                        saveHistory("history",editQuery);
-                    } else {
-                        ToastUtils.showShortToast(context, "请输入搜索关键词");
-                    }
-                }
-                return false;
-            }
-        });
-    }
 
     //输入监听
     private TextWatcher textWatcher = new TextWatcher() {

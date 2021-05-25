@@ -15,14 +15,15 @@ import com.xxy.weatherreport2.bean.AirNowResponse;
 import com.xxy.weatherreport2.bean.MoreAirFiveResponse;
 import com.xxy.weatherreport2.bean.NewSearchCityResponse;
 import com.xxy.weatherreport2.contract.MoreAirContract;
-import com.xxy.weatherreport2.utils.*;
+import com.xxy.weatherreport2.utils.CodeToStringUtils;
+import com.xxy.weatherreport2.utils.Constant;
+import com.xxy.weatherreport2.utils.DateUtils;
 import com.xxy.mvplibrary.view.LineProgressbar;
-import com.xxy.mvplibrary.view.RoundProgressBar;
-import com.xxy.mvplibrary.utils.*;
-import com.xxy.mvplibrary.mvp.MvpActivity;
-
 import com.xxy.weatherreport2.utils.StatusBarUtil;
-
+import com.xxy.weatherreport2.utils.ToastUtils;
+import com.xxy.weatherreport2.utils.WeatherUtil;
+import com.xxy.mvplibrary.mvp.MvpActivity;
+import com.xxy.mvplibrary.view.RoundProgressBar;
 import java.util.List;
 import butterknife.BindView;
 import retrofit2.Response;
@@ -97,7 +98,7 @@ public class MoreAirActivity extends MvpActivity<MoreAirContract.MoreAirPresente
     @Override
     public void getSearchCityIdResult(Response<NewSearchCityResponse> response) {
         dismissLoadingDialog();
-        if (response.body().getCode().equals(Constant.SUCCESS_CODE)) {
+        if (response.body().getStatus().equals(Constant.SUCCESS_CODE)) {
             showLoadingDialog();
             List<NewSearchCityResponse.LocationBean> data = response.body().getLocation();
             if (data != null && data.size() > 0) {
@@ -108,7 +109,7 @@ public class MoreAirActivity extends MvpActivity<MoreAirContract.MoreAirPresente
             }
 
         } else {
-            ToastUtils.showShortToast(context, CodeToStringUtils.WeatherCode(response.body().getCode()));
+            ToastUtils.showShortToast(context, CodeToStringUtils.WeatherCode(response.body().getStatus()));
         }
     }
 
@@ -214,4 +215,5 @@ public class MoreAirActivity extends MvpActivity<MoreAirContract.MoreAirPresente
     }
 
 }
+
 

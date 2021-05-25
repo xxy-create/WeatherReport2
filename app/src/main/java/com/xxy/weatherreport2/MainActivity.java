@@ -12,12 +12,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -30,10 +33,9 @@ import com.xxy.mvplibrary.utils.LiWindow;
 import com.xxy.weatherreport2.bean.*;
 import com.xxy.weatherreport2.contract.WeatherContract;
 import com.xxy.weatherreport2.eventbus.SearchCityEvent;
-import com.xxy.weatherreport2.ui.MoreAirActivity;
+import com.xxy.weatherreport2.ui.*;
 import com.xxy.weatherreport2.utils.*;
 import com.xxy.weatherreport2.adapter.*;
-import com.xxy.weatherreport2.ui.SearchCityActivity;
 import com.xxy.mvplibrary.mvp.MvpActivity;
 import com.xxy.mvplibrary.view.WhiteWindmills;
 import com.xxy.mvplibrary.view.RoundProgressBar;
@@ -62,7 +64,8 @@ import retrofit2.Response;
 import static com.xxy.mvplibrary.utils.RecyclerViewAnimation.runLayoutAnimationRight;
 import static com.xxy.mvplibrary.utils.RecyclerViewAnimation.runLayoutAnimation;
 
-public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> implements WeatherContract.IWeatherView {
+@RequiresApi(api = Build.VERSION_CODES.M)
+public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> implements WeatherContract.IWeatherView,View.OnScrollChangeListener {
 
     @BindView(R.id.tv_air_info)
     TextView tvAirInfo;//空气质量
@@ -112,6 +115,12 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     TextView tvO3;//臭氧
     @BindView(R.id.tv_co)
     TextView tvCo;//一氧化碳
+    @BindView(R.id.tv_title)
+    TextView tvTitle;//标题
+    @BindView(R.id.lay_slide_area)
+    LinearLayout laySlideArea;//当向上滑动超过这个布局的高度时，改变Toolbar中的TextView的显示文本
+    @BindView(R.id.scroll_view)
+    NestedScrollView scrollView;//滑动View
     @BindView(R.id.tv_more_air)
     TextView tvMoreAir;//更多空气信息
 
@@ -172,6 +181,8 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         animUtil = new AnimationUtil();
 
         EventBus.getDefault().register(this);//注册
+
+        scrollView.setOnScrollChangeListener(this);//指定当前页面，不写则滑动监听无效
     }
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(SearchCityEvent event){//授权
@@ -256,16 +267,12 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
             showLoadingDialog();
             //获取weather所有数据
             mPresent.weatherData(context,district);
-            //获取空气质量数据
-            //mPresent.airNowCity(context,city);
             //v7版本中需要先获取城市ID，在结果返回值中在进行下一步的数据查询
             mPresent.newSearchCity(district);
             //下拉刷新
             refresh.setOnRefreshListener(refreshLayout -> {
                 //获取weather所有数据
                 mPresent.weatherData(context,district);
-                //获取空气质量数据
-                //mPresent.airNowCity(context,city);
                 //v7版本中需要先获取城市ID，在结果返回值中在进行下一步的数据查询
                 mPresent.newSearchCity(district);
             });
@@ -348,43 +355,6 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     }
 
 
-        //空气质量数据返回
-/*    @Override
-    public void getAirNowCityResult(Response<AirNowCityResponse> response) {
-        dismissLoadingDialog();//关闭弹窗
-        if (("ok").equals(response.body().getHeWeather6().get(0).getStatus())) {
-            //UI显示
-            AirNowCityResponse.HeWeather6Bean.AirNowCityBean data = response.body().getHeWeather6().get(0).getAir_now_city();
-            if (!ObjectUtils.isEmpty(data) && data != null) {
-                //污染指数
-                rpbAqi.setMaxProgress(500);//最大进度，用于计算
-                rpbAqi.setMinText("0");//设置显示最小值
-                rpbAqi.setMinTextSize(32f);
-                rpbAqi.setMaxText("500");//设置显示最大值
-                rpbAqi.setMaxTextSize(32f);
-                rpbAqi.setProgress(Float.valueOf(data.getAqi()));//当前进度
-                rpbAqi.setArcBgColor(getResources().getColor(R.color.arc_bg_color));//圆弧的颜色
-                rpbAqi.setProgressColor(getResources().getColor(R.color.arc_progress_color));//进度圆弧的颜色
-                rpbAqi.setFirstText(data.getQlty());//空气质量描述  取值范围：优，良，轻度污染，中度污染，重度污染，严重污染
-                rpbAqi.setFirstTextSize(44f);
-                rpbAqi.setSecondText(data.getAqi());//空气质量值
-                rpbAqi.setSecondTextSize(64f);
-                rpbAqi.setMinText("0");
-                rpbAqi.setMinTextColor(getResources().getColor(R.color.arc_progress_color));
-
-                tvAirInfo.setText(data.getQlty());
-                tvPm10.setText(data.getPm10());//PM10
-                tvPm25.setText(data.getPm25());//PM2.5
-                tvNo2.setText(data.getNo2());//二氧化氮
-                tvSo2.setText(data.getSo2());//二氧化硫
-                tvO3.setText(data.getO3());//臭氧
-                tvCo.setText(data.getCo());//一氧化碳
-            }
-        } else {
-            ToastUtils.showShortToast(context, response.body().getHeWeather6().get(0).getStatus());
-        }
-    }*/
-
     /**
      * 空气质量返回  V7
      * @param response
@@ -409,6 +379,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
                 rpbAqi.setMinText("0");
                 rpbAqi.setMinTextColor(getResources().getColor(R.color.arc_progress_color));
 
+                tvAirInfo.setText("空气"+data.getCategory());
                 tvPm10.setText(data.getPm10());//PM10
                 tvPm25.setText(data.getPm2p5());//PM2.5
                 tvNo2.setText(data.getNo2());//二氧化氮
@@ -433,6 +404,8 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     @Override
     public void getNewSearchCityResult(Response<NewSearchCityResponse> response) {
         refresh.finishRefresh();//关闭刷新
+        dismissLoadingDialog();//关闭弹窗
+        mLocationClient.stop();//数据返回后关闭定位
         if (mLocationClient != null) {
             mLocationClient.stop();//数据返回后关闭定位
         }
@@ -440,6 +413,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
             if (response.body().getLocation() != null && response.body().getLocation().size() > 0) {
                 tvCity.setText(response.body().getLocation().get(0).getName());//城市
                 locationId = response.body().getLocation().get(0).getId();//城市Id
+                stationName = response.body().getLocation().get(0).getAdm2();//获得空气质量站点
 
                 showLoadingDialog();
                 mPresent.airNowWeather(locationId);//空气质量
@@ -692,6 +666,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         TextView changeCity = mPopupWindow.getContentView().findViewById(R.id.tv_change_city);
         //TextView changeBg = mPopupWindow.getContentView().findViewById(R.id.tv_change_bg);
         TextView searchCity = mPopupWindow.getContentView().findViewById(R.id.tv_search_city);//城市搜索
+        TextView residentCity = mPopupWindow.getContentView().findViewById(R.id.tv_resident_city);//常用城市
         TextView more = mPopupWindow.getContentView().findViewById(R.id.tv_more);
         changeCity.setOnClickListener(view -> {//切换城市
             showCityWindow();
@@ -704,6 +679,11 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         searchCity.setOnClickListener(view -> {//城市搜索
             SPUtils.putBoolean(Constant.FLAG_OTHER_RETURN, false, context);//缓存标识
             startActivity(new Intent(context, SearchCityActivity.class));
+            mPopupWindow.dismiss();
+        });
+        residentCity.setOnClickListener(view -> {//常用城市
+            SPUtils.putBoolean(Constant.FLAG_OTHER_RETURN, false, context);//缓存标识
+            startActivity(new Intent(context, CommonlyUsedCityActivity.class));
             mPopupWindow.dismiss();
         });
         more.setOnClickListener(view -> {//更多功能
@@ -750,6 +730,36 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     }
 
     /**
+     * 滑动监听
+     * @param v 滑动视图本身
+     * @param scrollX 滑动后的X轴位置
+     * @param scrollY 滑动后的Y轴位置
+     * @param oldScrollX 之前的X轴位置
+     * @param oldScrollY 之前的Y轴位置
+     */
+    @Override
+    public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+        if (scrollY > oldScrollY) {
+            Log.e("onScroll", "上滑");
+            //laySlideArea.getMeasuredHeight() 表示控件的绘制高度
+            if(scrollY > laySlideArea.getMeasuredHeight()){
+                String tx = tvCity.getText().toString();
+                if(tx.contains("定位中")){//因为存在网络异常问题，总不能你没有城市，还给你改变UI吧
+                    tvTitle.setText("城市天气");
+                }else {
+                    tvTitle.setText(tx);//改变TextView的显示文本
+                }
+            }
+        }
+        if (scrollY < oldScrollY) {
+            Log.e("onScroll", "下滑");
+            if(scrollY < laySlideArea.getMeasuredHeight()){
+                tvTitle.setText("城市天气");//改回原来的
+            }
+        }
+    }
+
+    /**
      * 添加点击事件
      *
      * @param view 控件
@@ -785,6 +795,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
             startActivity(intent);
         }
     }
+
 
     /**
      * 天气预报数据访问异常返回

@@ -32,6 +32,7 @@
                 app:contentInsetLeft="16dp"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
                 <TextView
+                    android:id="@+id/tv_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -65,15 +66,17 @@
             当这个布局长度超出手机展示的部分就可以滚动，其中overScrollMode="never"
             的意思是隐藏掉滚动条到顶部和底部时的水波纹-->
             <androidx.core.widget.NestedScrollView
+                android:id="@+id/scroll_view"
                 android:overScrollMode="never"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <!--天气和所在城市 -->
                 <LinearLayout
+                    android:id="@+id/lay_slide_area"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content">
                     <!--温度-->
                     <RelativeLayout
                         android:layout_marginTop="20dp"

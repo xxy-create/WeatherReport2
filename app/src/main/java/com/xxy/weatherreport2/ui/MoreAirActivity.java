@@ -98,7 +98,7 @@ public class MoreAirActivity extends MvpActivity<MoreAirContract.MoreAirPresente
     @Override
     public void getSearchCityIdResult(Response<NewSearchCityResponse> response) {
         dismissLoadingDialog();
-        if (response.body().getStatus().equals(Constant.SUCCESS_CODE)) {
+        if (response.body().getCode().equals(Constant.SUCCESS_CODE)) {
             showLoadingDialog();
             List<NewSearchCityResponse.LocationBean> data = response.body().getLocation();
             if (data != null && data.size() > 0) {
@@ -136,6 +136,7 @@ public class MoreAirActivity extends MvpActivity<MoreAirContract.MoreAirPresente
                 linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
                 rvStation.setLayoutManager(linearLayoutManager);
                 PagerSnapHelper snapHelper = new PagerSnapHelper();
+                rvStation.setOnFlingListener(null);//避免抛异常
                 snapHelper.attachToRecyclerView(rvStation);//滚动对齐，使RecyclerView像ViewPage一样，一次滑动一项,居中
                 rvStation.setAdapter(mAdapter);
 

@@ -89,7 +89,7 @@
                             android:textColor="#DAEBEE"
                             android:textSize="14sp" />
                         <!--显示污染指数进度值-->
-                        <com.llw.mvplibrary.view.RoundProgressBar
+                        <com.xxy.mvplibrary.view.RoundProgressBar
                             android:id="@+id/rpb_aqi"
                             android:layout_width="120dp"
                             android:layout_height="120dp"
@@ -118,7 +118,7 @@
                                 android:textColor="@color/blue_one"
                                 android:textSize="12sp" />
 
-                            <com.llw.mvplibrary.view.LineProgressbar
+                            <com.xxy.mvplibrary.view.LineProgressbar
                                 android:id="@+id/progress_pm10"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -150,7 +150,7 @@
                                 android:textColor="@color/blue_one"
                                 android:textSize="12sp" />
 
-                            <com.llw.mvplibrary.view.LineProgressbar
+                            <com.xxy.mvplibrary.view.LineProgressbar
                                 android:id="@+id/progress_pm25"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -194,7 +194,7 @@
                                     android:textSize="8sp" />
                             </LinearLayout>
 
-                            <com.llw.mvplibrary.view.LineProgressbar
+                            <com.xxy.mvplibrary.view.LineProgressbar
                                 android:id="@+id/progress_no2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -238,7 +238,7 @@
                                     android:textSize="8sp" />
                             </LinearLayout>
 
-                            <com.llw.mvplibrary.view.LineProgressbar
+                            <com.xxy.mvplibrary.view.LineProgressbar
                                 android:id="@+id/progress_so2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -281,7 +281,7 @@
                                     android:textColor="@color/blue_one"
                                     android:textSize="8sp" />
                             </LinearLayout>
-                            <com.llw.mvplibrary.view.LineProgressbar
+                            <com.xxy.mvplibrary.view.LineProgressbar
                                 android:id="@+id/progress_o3"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -313,7 +313,7 @@
                                 android:textColor="@color/blue_one"
                                 android:textSize="12sp" />
 
-                            <com.llw.mvplibrary.view.LineProgressbar
+                            <com.xxy.mvplibrary.view.LineProgressbar
                                 android:id="@+id/progress_co"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"

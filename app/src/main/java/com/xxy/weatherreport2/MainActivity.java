@@ -40,6 +40,7 @@ import com.xxy.mvplibrary.mvp.MvpActivity;
 import com.xxy.mvplibrary.view.WhiteWindmills;
 import com.xxy.mvplibrary.view.RoundProgressBar;
 import com.xxy.mvplibrary.utils.*;
+import com.xxy.mvplibrary.bean.ResidentCity;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.IOException;
@@ -56,6 +57,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.litepal.LitePal;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -125,7 +127,12 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     TextView tvMoreAir;//更多空气信息
 
     private boolean flag = true;//图标显示标识,true显示，false不显示,只有定位的时候才为true,切换城市和常用城市都为false
+    private boolean changeCityState = false;//常用城市列表  收缩状态  false 收缩  true 展开
+    private boolean isChangeCity = false;//是否可以展开，如果没有添加常用城市，自然不能展开
+    public boolean searchCityData = false;//搜索城市是否传递数据回来
 
+    //常用城市切换列表
+    private List<ResidentCity> residentCityList = new ArrayList<>();
 
     private RxPermissions rxPermissions;//权限请求框架
     //定位器
@@ -656,15 +663,6 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
 
     }
 
-
-/*
-    //点击事件
-    @OnClick(R.id.iv_add)
-    public void onViewClicked(){
-        showAddWindow();//更多功能弹窗
-        toggleBright();//计算动画时间
-    }
-*/
 
     /**
      * 更多功能弹窗，因为区别于我原先写的弹窗

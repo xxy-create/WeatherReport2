@@ -20,6 +20,32 @@ public interface ApiService {
     @GET("/s6/weather?key=7ae6424660264f0eb94c720bcc14588b")
     Call<WeatherResponse> weatherData(@Query("location") String location);
 
+    /**
+     * 实况天气
+     * @param location 城市名
+     * @return 返回实况天气数据
+     */
+    @GET("/v7/weather/now?key=3086e91d66c04ce588a7f538f917c7f4")
+    Call<NowResponse> nowWeather(@Query("location") String location);
+
+    /**
+     * 天气预报  因为是开发者所以最多可以获得15天的数据，但是如果你是普通用户，那么最多只能获得三天的数据
+     * 分为 3天、7天、10天、15天 四种情况，这是时候就需要动态的改变请求的url
+     * @param type  天数类型  传入3d / 7d / 10d / 15d  通过Path拼接到请求的url里面
+     * @param location 城市名
+     * @return 返回天气预报数据
+     */
+    @GET("/v7/weather/{type}?key=3086e91d66c04ce588a7f538f917c7f4")
+    Call<DailyResponse> dailyWeather(@Path("type") String type,@Query("location") String location);
+
+    /**
+     * 逐小时预报（未来24小时）之前是逐三小时预报
+     * @param location  城市名
+     * @return 返回逐小时数据
+     */
+    @GET("/v7/weather/24h?key=3086e91d66c04ce588a7f538f917c7f4")
+    Call<HourlyResponse> hourlyWeather(@Query("location") String location);
+
 
     /**
      * 空气质量5天预报
@@ -29,17 +55,6 @@ public interface ApiService {
      */
     @GET("/v7/air/5d?key=3086e91d66c04ce588a7f538f917c7f4")
     Call<MoreAirFiveResponse> airFiveWeather(@Query("location") String location);
-
-    /**
-     * 天气预报  因为是开发者所以最多可以获得15天的数据，但是如果你是普通用户，那么最多只能获得三天的数据
-     * 分为 3天、7天、10天、15天 四种情况，这是时候就需要动态的改变请求的url
-     *
-     * @param type     天数类型  传入3d / 7d / 10d / 15d  通过Path拼接到请求的url里面
-     * @param location 城市id
-     * @return 返回天气预报数据 DailyResponse
-     */
-    @GET("/v7/weather/{type}?key=3086e91d66c04ce588a7f538f917c7f4")
-    Call<DailyResponse> dailyWeather(@Path("type") String type, @Query("location") String location);
 
     /**
      * 当天空气质量

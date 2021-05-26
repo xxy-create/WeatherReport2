@@ -184,16 +184,13 @@ public class SearchCityActivity extends MvpActivity<SearchCityContract.SearchCit
         rv.setLayoutManager(new LinearLayoutManager(context));
         rv.setAdapter(mAdapter);
 
-        mAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-            @Override
-            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                SPUtils.putString(Constant.LOCATION, mList.get(position).getName(), context);
-                //发送消息
-                EventBus.getDefault().post(new SearchCityEvent(mList.get(position).getName(),
-                        mList.get(position).getAdm2()));//Adm2 代表市
+        mAdapter.setOnItemChildClickListener((adapter, view, position) -> {
+            SPUtils.putString(Constant.LOCATION, mList.get(position).getName(), context);
+            //发送消息
+            EventBus.getDefault().post(new SearchCityEvent(mList.get(position).getName(),
+                    mList.get(position).getAdm2()));//Adm2 代表市
 
-                finish();
-            }
+            finish();
         });
     }
 
@@ -310,7 +307,7 @@ public class SearchCityActivity extends MvpActivity<SearchCityContract.SearchCit
     @Override
     public void getNewSearchCityResult(Response<NewSearchCityResponse> response) {
         dismissLoadingDialog();
-        if (response.body().getStatus().equals(Constant.SUCCESS_CODE)) {
+        if (response.body().getCode().equals(Constant.SUCCESS_CODE)) {
             mList.clear();
             mList.addAll(response.body().getLocation());
             mAdapter.notifyDataSetChanged();
@@ -374,6 +371,8 @@ public class SearchCityActivity extends MvpActivity<SearchCityContract.SearchCit
             case R.id.iv_arrow://向下展开
                 flSearchRecords.setLimit(false);
                 mRecordsAdapter.notifyDataChanged();
+                break;
+            default:
                 break;
         }
     }
